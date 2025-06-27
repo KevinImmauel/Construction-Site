@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, jwt_required, get_jwt_identity
 from app.models import UserCreds
 from app import csrf,db
 
@@ -56,6 +56,20 @@ def add_user():
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg':f'failed {e}'})
+    
+@login_bp.route('/me', methods=['GET'])
+@jwt_required(locations=["cookies"])
+@csrf.exempt
+def get_current_user():
+    user_id = get_jwt_identity()
+    user = UserCreds.query.filter_by(id=user_id).first()
+    if not user:
+        return jsonify({'message': 'User not found'}), 401
+
+    return jsonify({
+        'username': user.username,
+        'isAdmin': user.isAdmin
+    }), 200
     
 @login_bp.route('/logout', methods=['POST'])
 @csrf.exempt

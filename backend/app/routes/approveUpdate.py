@@ -6,7 +6,7 @@ from sqlalchemy import Table, inspect, update
 
 approveUpdate_bp = Blueprint('approveUpdate', __name__)
 
-@approveUpdate_bp.route('/approveUpdate', methods=['UPDATE'])
+@approveUpdate_bp.route('/approveUpdate', methods=['PUT'])
 @jwt_required(locations=['cookies'])
 @csrf.exempt
 def approveUpdate():

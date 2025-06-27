@@ -1,110 +1,69 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app import db, csrf
 from app.models import UserCreds, ProjectsTable
-from sqlalchemy import Table, inspect
+from sqlalchemy import Table, inspect, select # Import select
 
 getupdates_bp = Blueprint('getupdates', __name__)
 
 @getupdates_bp.route('/getupdates', methods=['GET'])
 @jwt_required(locations=["cookies"])
-def getupdates():
+@csrf.exempt
+def get_all_project_updates():
     user_id = get_jwt_identity()
     user = UserCreds.query.filter_by(id=user_id).first()
     if not user:
         return jsonify({"message": "User not found"}), 401
-    
-    data = request.json
-    projectname = data.get('project_data_name')
-    username=user.username
-    inspector = inspect(db.engine)
-    project = Table(projectname,db.metadata,autoload_with=db.engine)
-    
-    if not ProjectsTable.query.filter_by(projectname=projectname).first():
-        return {'err': 'Project not found'}, 400
-    
-    if not user.isAdmin and not db.session.query(project).filter_by(username=username).first():
-        return {"err":"not authorized"}
-    
-    project_updates = Table(projectname+"_updates",db.metadata,autoload_with=db.engine)
+
+    projectname = request.args.get('project_data_name')
+    if not projectname:
+        return jsonify({'err': 'Missing project_data_name in query parameters'}), 400
+
+    username = user.username
+
+    project_entry = ProjectsTable.query.filter_by(projectname=projectname).first()
+    if not project_entry:
+        return jsonify({'err': 'Project not found'}), 404
 
     try:
-        query = db.session.query(project_updates.columns.update_desc)
-        result = query.all()
-
-        return {'data':f'{result}'}
+        project_members_table = Table(projectname, db.metadata, autoload_with=db.engine)
     except Exception as e:
-        return {'err': f'Error: {str(e)}'}, 400
+        return jsonify({'err': f'Error loading project member table: {str(e)}'}), 500
 
+    project_member = db.session.query(project_members_table).filter_by(username=username).first()
 
-getappupdates_bp = Blueprint('getappupdates', __name__)
+    if not user.isAdmin and (not project_member or not project_member.isLeader):
+        return jsonify({"err": "Not authorized to view updates for this project"}), 403
 
-@getappupdates_bp.route('/getappupdates', methods=['GET'])
-@jwt_required(locations=["cookies"])
-def getupdates():
-    user_id = get_jwt_identity()
-    user = UserCreds.query.filter_by(id=user_id).first()
-    if not user:
-        return jsonify({"message": "User not found"}), 401
-    
-    data = request.json
-    projectname = data.get('project_data_name')
-    username=user.username
-    inspector = inspect(db.engine)
-    project = Table(projectname,db.metadata,autoload_with=db.engine)
-    
-    if not ProjectsTable.query.filter_by(projectname=projectname).first():
-        return {'err': 'Project not found'}, 400
-    
-    if not user.isAdmin and not db.session.query(project).filter_by(username=username).first():
-        return {"err":"not authorized"}
-    
-    project_updates = Table(projectname+"_updates",db.metadata,autoload_with=db.engine)
 
     try:
-        query = db.session.query(project_updates).filter_by(approved=1)
-        result = []
+        project_updates_table = Table(projectname + "_updates", db.metadata, autoload_with=db.engine)
 
-        for i in query:
-            result.append(i.update_desc)
+        stmt = select(
+            project_updates_table.c.id,
+            project_updates_table.c.username,
+            project_updates_table.c.update_desc,
+            project_updates_table.c.approved,
+            project_updates_table.c.percentage
+        )
+        stmt = stmt.order_by(project_updates_table.c.id.desc())
 
-        return {'data':f'{result}'}
+        result = db.session.execute(stmt).fetchall()
+
+        updates_list = []
+        for row in result:
+            updates_list.append({
+                'id': row.id,
+                'username': row.username,
+                'update_desc': row.update_desc,
+                'approved': bool(row.approved),
+                'percentage': row.percentage
+            })
+
+        return jsonify({'data': updates_list}), 200
+
     except Exception as e:
-        return {'err': f'Error: {str(e)}'}, 400
-
-
-getunappupdates_bp = Blueprint('getunappupdates', __name__)
-
-@getunappupdates_bp.route('/getunappupdates', methods=['GET'])
-@jwt_required(locations=["cookies"])
-def getupdates():
-    user_id = get_jwt_identity()
-    user = UserCreds.query.filter_by(id=user_id).first()
-    if not user:
-        return jsonify({"message": "User not found"}), 401
-    
-    data = request.json
-    projectname = data.get('project_data_name')
-    username=user.username
-    inspector = inspect(db.engine)
-    project = Table(projectname,db.metadata,autoload_with=db.engine)
-    
-    if not ProjectsTable.query.filter_by(projectname=projectname).first():
-        return {'err': 'Project not found'}, 400
-    
-    if not user.isAdmin and not db.session.query(project).filter_by(username=username).first():
-        return {"err":"not authorized"}
-    
-    project_updates = Table(projectname+"_updates",db.metadata,autoload_with=db.engine)
-
-    try:
-        query = db.session.query(project_updates).filter_by(approved=0)
-        result = []
-
-        for i in query:
-            result.append(i.update_desc)
-
-        return {'data':f'{result}'}
-    except Exception as e:
-        return {'err': f'Error: {str(e)}'}, 400
-    
+        print(f"Error fetching updates for project {projectname}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'err': f'Server error fetching updates: {str(e)}'}), 500
