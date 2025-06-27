@@ -1,5 +1,33 @@
 # Construction-Site
 
+## Instructions to run dev
+
+* Open two terminals one for backend and one for frontned
+* for backend (if using linux) :
+* ```
+  cd backend
+  python -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+  python run.py
+  ```
+* if using windows
+* ```
+  cd backend
+  python -m venv venv
+  cd venv/Scripts
+  activate
+  cd ../..
+  pip install -r requirements.txt
+  python run.py
+  ```
+* for frontend:
+* ```
+  cd client
+  npm i
+  npm run dev
+  ```
+
 ## Backend API Documentation
 
 ## Overview
