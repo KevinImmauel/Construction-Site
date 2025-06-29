@@ -11,3 +11,6 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
     WTF_CSRF_ENABLED = False
     JWT_COOKIE_CSRF_PROTECT = False
+    JWT_COOKIE_SECURE = False  # Allow cookies over HTTP for localhost
+    JWT_TOKEN_LOCATION = ["cookies"]
+    JWT_COOKIE_SAMESITE = "Lax"
