@@ -13,6 +13,12 @@ def login():
     password = data.get('password')
 
     user = UserCreds.query.filter_by(username=username).first()
+    # Debug output
+    print(f"Login attempt: username={username}, password={password}")
+    if user:
+        print(f"User from DB: username={user.username}, password in DB: {user.password}")
+    else:
+        print("No user found in DB with that username.")
     #FOR DINESH TO ENCRYPT PSSWRD
     #if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
     if user and password == user.password:

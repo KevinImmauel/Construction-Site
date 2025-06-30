@@ -1,32 +1,78 @@
-# Construction-Site
+# Vikasana (Construction-Site)
 
-## Instructions to run dev
+## Project Overview
 
-* Open two terminals one for backend and one for frontned
-* for backend (if using linux) :
-* ```
-  cd backend
-  python -m venv venv
-  source venv/bin/activate
-  pip install -r requirements.txt
-  python run.py
-  ```
-* if using windows
-* ```
-  cd backend
-  python -m venv venv
-  cd venv/Scripts
-  activate
-  cd ../..
-  pip install -r requirements.txt
-  python run.py
-  ```
-* for frontend:
-* ```
-  cd client
-  npm i
-  npm run dev
-  ```
+Vikasana is a next-generation, point-based project management platform with a modern, Figma-inspired UI. The project now features a fully scaffolded frontend (Next.js + Tailwind CSS) and a robust Flask backend. All main user and admin pages are present, navigation and buttons work, and the UI is ready for real data and assets.
+
+---
+
+## How to Run (Dev)
+
+### Backend
+- `cd backend`
+- (Windows):
+  - `python -m venv venv`
+  - `venv\Scripts\activate`
+  - `pip install -r requirements.txt`
+  - `python run.py`
+- (Linux/Mac):
+  - `python -m venv venv`
+  - `source venv/bin/activate`
+  - `pip install -r requirements.txt`
+  - `python run.py`
+
+### Frontend
+- `cd client`
+- `npm install`
+- `npm run dev`
+
+---
+
+## What Works Now
+- **Modern, Figma-inspired UI** for all main pages (login, dashboard, project details, archives, profile, admin, etc.)
+- **Navigation and all buttons work**: clicking cards, icons, or buttons takes you to the correct page
+- **User and admin flows** are scaffolded and testable
+- **Placeholders and mock data** are used throughout for projects, users, documents, etc.
+- **Responsive design** and Sora font for a clean, professional look
+
+---
+
+## What You (the User) Have Done
+- Provided Figma design and branding direction
+- Uploaded logo and background assets
+- Specified user/admin flows and required features
+- Requested a full project scaffold with working navigation and UI
+- Confirmed login and dashboard functionality
+
+---
+
+## What Still Needs To Be Done
+- **Integrate real backend data** for projects, users, updates, etc.
+- **Replace placeholder images and icons** with final assets from Figma
+- **Implement all backend API connections** for CRUD, authentication, and real-time updates
+- **Add form validation, error handling, and user feedback**
+- **Polish UI/UX** and add any missing Figma details
+- **Testing and bug fixes** for production readiness
+
+---
+
+## How to Contribute
+- Fork the repo, create a branch, and submit a pull request.
+- See `/backend/app` and `/client/app` for main code.
+
+---
+
+## Changelog (Recent Major Changes)
+- Full frontend redesign to match Figma
+- All main pages scaffolded (login, dashboard, project, archives, profile, admin)
+- Navigation and button routing implemented
+- User and admin flows separated
+- Placeholders and mock data for all sections
+
+---
+
+## Contact
+For questions or feedback, open an issue or contact the maintainer.
 
 ## Backend API Documentation
 
@@ -245,9 +291,9 @@ Suggested leaderboard metrics:
 
 Suggested badges:
 
-* “First Project Approved”
-* “1000 Points Earned”
-* “Top Contributor of the Month”
+* "First Project Approved"
+* "1000 Points Earned"
+* "Top Contributor of the Month"
 
 These can be calculated in the frontend from `/getpro` and user score data.
 
